@@ -81,6 +81,14 @@ Aby uruchomić aplikację w trybie deweloperskim:
 
 Aplikacja będzie dostępna pod adresem `http://localhost:5173/` (lub innym adresem podanym przez Vite).
 
+
+## Budowanie i uruchamianie w kontenerze Docker (wymaga Docker) - Multi-stage Build:
+### Zbuduj obraz
+`docker build -t envirosolutions4:latest .`
+
+### Uruchom kontener
+`docker run -p 5173:80 envirosolutions4:latest`
+
 ## Kluczowe Funkcjonalności i Użyte Technologie
 
 | Funkcjonalność | Implementacja | Technologia |
