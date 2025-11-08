@@ -10,6 +10,7 @@ import {
     Tooltip,
     Typography
 } from "@mui/material";
+
 // @ts-ignore
 import PathAnimation from 'ol-ext/featureAnimation/Path';
 
@@ -30,16 +31,17 @@ import Style from 'ol/style/Style';
 import View from 'ol/View';
 import proj4 from 'proj4';
 import {type FC, useCallback, useEffect, useRef, useState} from 'react';
-import {POLAND_EXTENT_3857, POLAND_EXTENT_4326} from '../common/poland-bbox'
+import {POLAND_EXTENT_3857, POLAND_EXTENT_4326,} from '../common/poland-bbox'
 import 'ol/ol.css';
 import 'ol-ext/dist/ol-ext.css';
-import {linieGeoJSON, wojewodztwaGeoJSON} from "../db/test.ts";
+import {chartGeoJSON, linieGeoJSON, wojewodztwaGeoJSON} from "../db/test.ts";
 import {
     BoxStyles,
     ControlsAttribution,
     ControlsScale,
     ControlsScaleInner,
     ControlsZoom,
+    defaultStyle,
     MapStyles
 } from "./styles/map-osm-poland.styles.tsx";
 import {CHART_TYPES, type ChartType} from "./types/map-osm-poland.types.ts";
@@ -68,6 +70,7 @@ export const MapOsmPolandData: FC = () => {
     const [layersVisible, setLayersVisible] = useState({
         wojewodztwa: true,
         linie: true,
+        test: true
     });
     const [chartType, setChartType] = useState<ChartType>('bar');
 
@@ -89,6 +92,16 @@ export const MapOsmPolandData: FC = () => {
             }),
         });
 
+        // --- WARSTWA 2: Warstwa Województw (Wykresy ChartStyle, EPSG:4258) ---
+        const vectorSource = new VectorSource({
+            features: new GeoJSON().readFeatures(wojewodztwaGeoJSON, {
+                // Dane GeoJSON mają układ współrzędnych EPSG:4258 (geograficzny/WGS84)
+                dataProjection: 'EPSG:4258',
+                // Docelowy układ współrzędnych mapy (domyślnie OpenLayers)
+                featureProjection: 'EPSG:3857',
+            }),
+        });
+
         const lineLayer = new VectorLayer({
             source: lineSource,
             visible: layersVisible.linie,
@@ -102,9 +115,19 @@ export const MapOsmPolandData: FC = () => {
             }),
         });
 
-        // --- WARSTWA 2: Warstwa Województw (Wykresy ChartStyle, EPSG:4258) ---
+
+        // 2. Definicja warstwy wektorowej
+        const vectorLayer = new VectorLayer({
+            source: vectorSource,
+            style: defaultStyle,
+            visible: layersVisible.wojewodztwa,
+            properties: {name: 'wojewodztwa'}, // Nazwa do zarządzania
+
+        });
+
+
         const chartSource = new VectorSource({
-            features: new GeoJSON().readFeatures(wojewodztwaGeoJSON, {
+            features: new GeoJSON().readFeatures(chartGeoJSON, {
                 dataProjection: 'EPSG:4258',
                 featureProjection: 'EPSG:3857',
             }),
@@ -112,8 +135,8 @@ export const MapOsmPolandData: FC = () => {
 
         const chartLayer = new VectorLayer({
             source: chartSource,
-            visible: layersVisible.wojewodztwa,
-            properties: {name: 'wojewodztwa'}, // Nazwa do zarządzania
+            visible: layersVisible.test,
+            properties: {name: 'test'}, // Nazwa do zarządzania
             style: (feature) => {
                 // Dane do wykresu są pobierane z właściwości (properties) obiektu
                 const data = [
@@ -144,6 +167,7 @@ export const MapOsmPolandData: FC = () => {
 
         // --- WARSTWA 3: Warstwa MASKI (Poligon zasłaniający świat poza granicami Polski) ---
         // Najprostszy poligon otaczający Polskę
+
         const maskGeometry = new GeoJSON().readFeature({
             type: 'Polygon',
             coordinates: [
@@ -175,9 +199,7 @@ export const MapOsmPolandData: FC = () => {
             source: maskSource,
             properties: {name: 'maska'},
             style: new Style({
-                fill: new Fill({
-                    color: 'rgba(255, 255, 255, 1)', // Biała, nieprzezroczysta maska
-                }),
+                fill: new Fill({ color: 'rgba(255, 255, 255, 0.8)' }), // Biała maska
             }),
             zIndex: 10, // Ustawienie z-index na wyższy, by maska była na wierzchu OSM
         });
@@ -185,8 +207,8 @@ export const MapOsmPolandData: FC = () => {
         // Użycie maski ol-ext jest bardziej zaawansowane. Ten prosty poligon jest łatwiejszy w implementacji.
         // Aby zablokować mapę do widoku Polski, użyjemy opcji 'extent' w View.
 
-        return [lineLayer, chartLayer, maskLayer];
-    }, [layersVisible.linie, layersVisible.wojewodztwa, chartType]);
+        return [lineLayer, vectorLayer, chartLayer, maskLayer];
+    }, [layersVisible.linie, layersVisible.wojewodztwa, chartType, layersVisible.test]);
 
 
     useEffect(() => {
@@ -288,6 +310,8 @@ export const MapOsmPolandData: FC = () => {
                 layer.setVisible(layersVisible.wojewodztwa);
             } else if (name === 'linie') {
                 layer.setVisible(layersVisible.linie);
+            } else if (name === 'test') {
+                layer.setVisible(layersVisible.test);
             }
         });
     }, [map, layersVisible]);
@@ -311,20 +335,24 @@ export const MapOsmPolandData: FC = () => {
             <BoxStyles className="controls">
                 <FormGroup>
                     <FormControlLabel control={<Checkbox
-                                                         checked={layersVisible.wojewodztwa}
-                                                         onChange={() => handleToggleLayer('wojewodztwa')}/>}
+                        checked={layersVisible.wojewodztwa}
+                        onChange={() => handleToggleLayer('wojewodztwa')}/>}
                                       label="Województwa (Wykresy)"/>
                     <FormControlLabel required control={<Checkbox
-                                                                  checked={layersVisible.linie}
-                                                                  onChange={() => handleToggleLayer('linie')}/>}
+                        checked={layersVisible.linie}
+                        onChange={() => handleToggleLayer('linie')}/>}
                                       label="Linie"/>
+                    <FormControlLabel required control={<Checkbox
+                        checked={layersVisible.test}
+                        onChange={() => handleToggleLayer('test')}/>}
+                                      label="Test"/>
                     <InputLabel id="typ_wykresu_label:">Typ Wykresu:</InputLabel>
                     <Select
                         labelId="typ_wykresu_label"
                         id="typ_wykresu_select"
                         value={chartType}
                         onChange={handleChartTypeChange}
-                        disabled={!layersVisible.wojewodztwa}
+                        disabled={!layersVisible.test}
                         variant="standard"
                     >
                         {CHART_TYPES.map(type => (
