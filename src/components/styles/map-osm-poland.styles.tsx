@@ -1,9 +1,20 @@
 import {Box} from '@mui/material';
 import {styled} from '@mui/material/styles';
+import Fill from "ol/style/Fill";
+import Stroke from "ol/style/Stroke";
+import Style from "ol/style/Style";
 
-export interface BoxStylesProps {
-    basictiles: string;
-}
+// Podstawowy styl dla obiektów GeoJSON
+export const defaultStyle = new Style({
+    stroke: new Stroke({
+        color: 'rgba(255, 0, 0, 0.8)', // Czerwona linia
+        width: 2,
+    }),
+    fill: new Fill({
+        color: 'rgba(255, 0, 0, 0.2)', // Lekko przeźroczysty czerwony wypełnienie
+    }),
+});
+
 export const MapStyles = styled(Box)(({theme}) => ({
 
     '& .ol-viewport': {

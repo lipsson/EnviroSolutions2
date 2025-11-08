@@ -1,8 +1,10 @@
 import linie from './linie.geojson?raw';
+import wojewodztwa from './wojewodztwa.geojson?raw';
 // Symulacja danych
 
-const wojewodztwaGeoJSON =   // JSON.parse(wojewodztwa) || {
-    {
+const wojewodztwaGeoJSON =    JSON.parse(wojewodztwa)
+
+const chartGeoJSON = {
         type: 'FeatureCollection',
         crs: {
             type: 'name',
@@ -42,4 +44,4 @@ const linieGeoJSON = JSON.parse(linie) || { /* ... Twoje dane z EPSG:2180 ... */
 }
 
 
-export {wojewodztwaGeoJSON, linieGeoJSON};
+export {wojewodztwaGeoJSON, linieGeoJSON, chartGeoJSON};
