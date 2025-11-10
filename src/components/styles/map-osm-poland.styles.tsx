@@ -1,4 +1,4 @@
-import {Box} from '@mui/material';
+import {Box, FormGroup} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
@@ -7,13 +7,22 @@ import Style from "ol/style/Style";
 // Podstawowy styl dla obiektów GeoJSON
 export const defaultStyle = new Style({
     stroke: new Stroke({
-        color: 'rgba(255, 0, 0, 0.8)', // Czerwona linia
+        color: 'rgba(51, 102, 255, 0.5)', // Czerwona linia
         width: 2,
     }),
     fill: new Fill({
-        color: 'rgba(255, 0, 0, 0.2)', // Lekko przeźroczysty czerwony wypełnienie
+        color: 'rgba(0, 0, 50, 0.2)', // Lekko przeźroczysty czerwony wypełnienie
     }),
 });
+
+export const lineStyle = new Style({
+        // Minimalistyczny styl dla płynności
+        stroke: new Stroke({
+            color: 'rgba(0, 0, 0, 0.7)',
+            width: 2,
+        }),
+    });
+
 
 export const MapStyles = styled(Box)(({theme}) => ({
 
@@ -28,14 +37,16 @@ export const MapStyles = styled(Box)(({theme}) => ({
         minHeight: 400,/* opcjonalnie */
     }
 }));
-export const BoxStyles = styled(Box)(({ theme }) => ({
+export const BoxStyles = styled(FormGroup)(({ theme }) => ({
     alignItems: 'center',
-    backgroundColor: theme.palette.secondary.main,
-    borderRadius: 4,
+    borderRadius: 50,
+    color: theme.palette.primary.main,
+    backgroundColor: theme.palette.background.default,
     border: '1px solid',
     borderColor: theme.palette.primary.main,
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
     justifyContent: 'center',
     left: '50%',
     margin: '25px 0',
