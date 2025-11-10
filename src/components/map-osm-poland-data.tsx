@@ -11,15 +11,11 @@ import {
     Typography
 } from "@mui/material";
 
-// @ts-ignore
-import PathAnimation from 'ol-ext/featureAnimation/Path';
-
 // @ts-ignore - Wymaga zewnętrznych definicji typów
 import ChartStyle from 'ol-ext/style/Chart';
 import {Attribution, defaults as defaultControls, ScaleLine, Zoom} from 'ol/control';
 import {getCenter} from "ol/extent";
 import type {FeatureLike} from "ol/Feature";
-// import {getCenter} from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 import Point from "ol/geom/Point";
 import TileLayer from 'ol/layer/Tile';
